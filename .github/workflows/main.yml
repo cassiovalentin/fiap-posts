@@ -12,21 +12,14 @@ jobs:
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      MONGO_URL: ${{ secrets.MONGO_URL }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
       - name: Build and Push Docker Image
         run: |
-          docker buildx build . \
-            --tag $DOCKER_USERNAME/posts:latest \
-            --build-arg MONGO_URL=$MONGO_URL \
-            --push
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker build -t $DOCKER_USERNAME/posts:latest --build-arg MONGO_URI=$MONGO_URI .
+          docker push $DOCKER_USERNAME/posts:latest
